@@ -38,3 +38,9 @@ captures/
 
 # Keystore files
 *.jks
+
+# MAC and Android studio
+*.DS_Store*
+*idea*
+*.idea*
+.idea/*
