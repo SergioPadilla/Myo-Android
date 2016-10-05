@@ -44,3 +44,6 @@ captures/
 *idea*
 *.idea*
 .idea/*
+
+# API KEY
+*credentials*
