@@ -154,7 +154,7 @@ public class YouTubeActivity extends AppCompatActivity implements
     @Override
     public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player,
                                         boolean wasResumed) {
-        VideoWallDemoActivity.this.player = player;
+        YouTubeActivity.this.player = player;
         player.setPlayerStyle(PlayerStyle.CHROMELESS);
         player.setPlayerStateChangeListener(new VideoListener());
         maybeStartDemo();
