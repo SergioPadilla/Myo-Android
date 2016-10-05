@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.piser.myo">
-
     // Required for communicating with the Myo device
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
     // Required for sending usage data to Thalmic Labs
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,6 +14,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MyoActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Youtube.YouTubeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
