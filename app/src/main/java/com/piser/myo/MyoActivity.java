@@ -38,7 +38,8 @@ public class MyoActivity extends AppCompatActivity {
         else {
             // Disable standard Myo locking policy. All poses will be delivered.
             hub.setLockingPolicy(Hub.LockingPolicy.NONE);
-            startConnectActivity();
+            //startConnectActivity();
+            Hub.getInstance().attachToAdjacentMyo();
             listener = get_listener();
         }
     }
@@ -73,7 +74,7 @@ public class MyoActivity extends AppCompatActivity {
 
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
-                Toast.makeText(getApplicationContext(), "Pose: " + pose, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Pose: " + pose.toString(), Toast.LENGTH_SHORT).show();
 
                 //TODO: Do something awesome.
             }
