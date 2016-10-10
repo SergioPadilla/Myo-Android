@@ -87,19 +87,27 @@ public class MyoActivity extends AppCompatActivity {
                 pose_label.setText("Pose: " + pose.toString());
 
                 if(pose == Pose.REST) {
-
+                    // Mano normal
                 }
                 else if(pose == Pose.DOUBLE_TAP) {
+                    // Movimiento pinza doble (dificil de reconocer)
 
                 }
                 else if(pose == Pose.WAVE_IN) {
+                    // Mano hacia dentro
 
                 }
                 else if(pose == Pose.WAVE_OUT) {
+                    // Mano hacia fuera
 
                 }
                 else if(pose == Pose.FIST) {
+                    // Cerrar puño
 
+                }
+                else if(pose == Pose.FINGERS_SPREAD) {
+                    // Abrir mano y dedos
+                    
                 }
 
                 //TODO: Do something awesome.
