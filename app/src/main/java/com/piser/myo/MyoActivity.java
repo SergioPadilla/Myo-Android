@@ -9,9 +9,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.thalmic.myo.AbstractDeviceListener;
+import com.thalmic.myo.Arm;
 import com.thalmic.myo.Hub;
 import com.thalmic.myo.Myo;
 import com.thalmic.myo.Pose;
+import com.thalmic.myo.XDirection;
 import com.thalmic.myo.scanner.ScanActivity;
 
 public class MyoActivity extends AppCompatActivity {
@@ -20,14 +22,19 @@ public class MyoActivity extends AppCompatActivity {
 
     private Hub hub;
     private AbstractDeviceListener listener;
-    private TextView centerlabel;
+
+    private TextView connected_label;
+    private TextView arm_label;
+    private TextView pose_label;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_myo);
 
-        centerlabel = (TextView) findViewById(R.id.centerlabel);
+        connected_label = (TextView) findViewById(R.id.connectedlabel);
+        arm_label = (TextView) findViewById(R.id.arm_label);
+        pose_label = (TextView) findViewById(R.id.pose_label);
 
         hub = Hub.getInstance();
 
@@ -38,8 +45,11 @@ public class MyoActivity extends AppCompatActivity {
         else {
             // Disable standard Myo locking policy. All poses will be delivered.
             hub.setLockingPolicy(Hub.LockingPolicy.NONE);
-            //startConnectActivity();
-            Hub.getInstance().attachToAdjacentMyo();
+            // Capture the Myo nearest automatically
+            //Hub.getInstance().attachToAdjacentMyo();
+            // scan Myo by activity
+            startConnectActivity();
+            // Create listener for Myo
             listener = get_listener();
         }
     }
@@ -59,24 +69,50 @@ public class MyoActivity extends AppCompatActivity {
             @Override
             public void onConnect(Myo myo, long timestamp) {
                 Toast.makeText(getApplicationContext(), "Myo Connected!", Toast.LENGTH_SHORT).show();
-                centerlabel.setText("Myo Connected!");
-                centerlabel.setTextColor(ContextCompat.getColor(MyoActivity.this,
+                connected_label.setText("Myo Connected!");
+                connected_label.setTextColor(ContextCompat.getColor(MyoActivity.this,
                         android.R.color.holo_blue_dark));
             }
 
             @Override
             public void onDisconnect(Myo myo, long timestamp) {
                 Toast.makeText(getApplicationContext(), "Myo Disconnected!", Toast.LENGTH_SHORT).show();
-                centerlabel.setText("Myo Disconnected!");
-                centerlabel.setTextColor(ContextCompat.getColor(MyoActivity.this,
+                connected_label.setText("Myo Disconnected!");
+                connected_label.setTextColor(ContextCompat.getColor(MyoActivity.this,
                         android.R.color.holo_red_dark));
             }
 
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
-                Toast.makeText(getApplicationContext(), "Pose: " + pose.toString(), Toast.LENGTH_SHORT).show();
+                pose_label.setText("Pose: " + pose.toString());
+
+                if(pose == Pose.REST) {
+
+                }
+                else if(pose == Pose.DOUBLE_TAP) {
+
+                }
+                else if(pose == Pose.WAVE_IN) {
+
+                }
+                else if(pose == Pose.WAVE_OUT) {
+
+                }
+                else if(pose == Pose.FIST) {
+
+                }
 
                 //TODO: Do something awesome.
+            }
+
+            @Override
+            public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection) {
+                arm_label.setText(myo.getArm() == Arm.LEFT ? "Arm left" : "Arm right");
+            }
+
+            @Override
+            public void onArmUnsync(Myo myo, long timestamp) {
+                arm_label.setText("Arm not Detected");
             }
         };
     }
