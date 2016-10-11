@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.piser.myo.MyoActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -24,19 +25,22 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ARM"
-            android:id="@+id/arm_label"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="POSE"
             android:id="@+id/pose_label"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ARM"
+            android:id="@+id/arm_label"
+            android:layout_alignBaseline="@+id/connectedlabel"
+            android:layout_alignBottom="@+id/connectedlabel"
+            android:layout_toEndOf="@+id/connectedlabel"
+            android:layout_marginStart="38dp" />
+
     </RelativeLayout>
 
     <fragment
@@ -44,5 +48,23 @@
         android:id="@+id/youtube_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="X_Orientation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/x_orientation_label" />
+
+    <TextView
+        android:text="X_Orientation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/y_orientation_label" />
+
+    <TextView
+        android:text="Z_Orientation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/z_orientation_label" />
 
 </LinearLayout>

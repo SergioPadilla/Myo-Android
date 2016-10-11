@@ -19,6 +19,7 @@ import com.thalmic.myo.Arm;
 import com.thalmic.myo.Hub;
 import com.thalmic.myo.Myo;
 import com.thalmic.myo.Pose;
+import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.XDirection;
 import com.thalmic.myo.scanner.ScanActivity;
 
@@ -32,8 +33,13 @@ public class MyoActivity extends AppCompatActivity {
     private TextView connected_label;
     private TextView arm_label;
     private TextView pose_label;
+    private TextView x_orientation_label;
+    private TextView y_orientation_label;
+    private TextView z_orientation_label;
+
     private YouTubePlayerFragment youTubePlayerFragment;
     private YouTubePlayer player; // control video
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,10 @@ public class MyoActivity extends AppCompatActivity {
         connected_label = (TextView) findViewById(R.id.connectedlabel);
         arm_label = (TextView) findViewById(R.id.arm_label);
         pose_label = (TextView) findViewById(R.id.pose_label);
+        x_orientation_label = (TextView) findViewById(R.id.x_orientation_label);
+        y_orientation_label = (TextView) findViewById(R.id.y_orientation_label);
+        z_orientation_label = (TextView) findViewById(R.id.z_orientation_label);
+
         youTubePlayerFragment = (YouTubePlayerFragment)getFragmentManager()
                 .findFragmentById(R.id.youtube_fragment);
 
@@ -97,6 +107,7 @@ public class MyoActivity extends AppCompatActivity {
     }
 
     private AbstractDeviceListener get_listener() {
+
         /**
          * Get the listener to myo device
          */
@@ -146,8 +157,8 @@ public class MyoActivity extends AppCompatActivity {
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
-
                 }
+
 
                 //TODO: Do something awesome.
             }
@@ -160,6 +171,25 @@ public class MyoActivity extends AppCompatActivity {
             @Override
             public void onArmUnsync(Myo myo, long timestamp) {
                 arm_label.setText("Arm not Detected");
+            }
+
+            @Override
+            public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
+                // Calcula los angulos de Euler
+                // (roll: eje morro cola (x)) (pitch: eje ala (y)) (yaw: eje perpenticular al objeto (z))
+                float roll = (float) Math.toDegrees(Quaternion.roll(rotation));
+                float pitch = (float) Math.toDegrees(Quaternion.pitch(rotation));
+                float yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
+                // Adjust roll and pitch for the orientation of the Myo on the arm.
+                if (myo.getXDirection() == XDirection.TOWARD_ELBOW) {
+                    roll *= -1;
+                    pitch *= -1;
+                }
+                // Next, we apply a rotation to the text view using the roll, pitch, and yaw.
+
+                x_orientation_label.setText("Xº: "+String.valueOf(roll));
+                y_orientation_label.setText("Yº: "+String.valueOf(pitch));
+                z_orientation_label.setText("Zº: "+String.valueOf(yaw));
             }
         };
     }
