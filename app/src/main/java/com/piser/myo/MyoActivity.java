@@ -1,13 +1,19 @@
 package com.piser.myo;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.piser.myo.Youtube.DeveloperKey;
 import com.thalmic.myo.AbstractDeviceListener;
 import com.thalmic.myo.Arm;
 import com.thalmic.myo.Hub;
@@ -26,6 +32,8 @@ public class MyoActivity extends AppCompatActivity {
     private TextView connected_label;
     private TextView arm_label;
     private TextView pose_label;
+    private YouTubePlayerFragment youTubePlayerFragment;
+    private YouTubePlayer player; // control video
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,8 @@ public class MyoActivity extends AppCompatActivity {
         connected_label = (TextView) findViewById(R.id.connectedlabel);
         arm_label = (TextView) findViewById(R.id.arm_label);
         pose_label = (TextView) findViewById(R.id.pose_label);
+        youTubePlayerFragment = (YouTubePlayerFragment)getFragmentManager()
+                .findFragmentById(R.id.youtube_fragment);
 
         hub = Hub.getInstance();
 
@@ -51,7 +61,32 @@ public class MyoActivity extends AppCompatActivity {
             startConnectActivity();
             // Create listener for Myo
             listener = get_listener();
+
+            createYoutubeFragment();
         }
+    }
+
+    private void createYoutubeFragment() {
+        YouTubePlayerFragment youTubeFragment = YouTubePlayerFragment.newInstance();
+
+        youTubeFragment.initialize(DeveloperKey.DEVELOPER_KEY,
+                new YouTubePlayer.OnInitializedListener() {
+            @Override
+            public void onInitializationSuccess(YouTubePlayer.Provider provider,
+                                                YouTubePlayer youTubePlayer, boolean b) {
+                player = youTubePlayer;
+                player.cueVideo("RrGqlGxRIn0");
+                player.play();
+            }
+
+            @Override
+            public void onInitializationFailure(YouTubePlayer.Provider provider,
+                                                YouTubeInitializationResult
+                                                        youTubeInitializationResult) {
+                Toast.makeText(getApplicationContext(), "YouTubePlayer.onInitializationFailure(): "
+                        + youTubeInitializationResult.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void startConnectActivity() {
@@ -68,7 +103,8 @@ public class MyoActivity extends AppCompatActivity {
         return new AbstractDeviceListener() {
             @Override
             public void onConnect(Myo myo, long timestamp) {
-                Toast.makeText(getApplicationContext(), "Myo Connected!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Myo Connected!",
+                        Toast.LENGTH_SHORT).show();
                 connected_label.setText("Myo Connected!");
                 connected_label.setTextColor(ContextCompat.getColor(MyoActivity.this,
                         android.R.color.holo_blue_dark));
@@ -76,7 +112,8 @@ public class MyoActivity extends AppCompatActivity {
 
             @Override
             public void onDisconnect(Myo myo, long timestamp) {
-                Toast.makeText(getApplicationContext(), "Myo Disconnected!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Myo Disconnected!",
+                        Toast.LENGTH_SHORT).show();
                 connected_label.setText("Myo Disconnected!");
                 connected_label.setTextColor(ContextCompat.getColor(MyoActivity.this,
                         android.R.color.holo_red_dark));
@@ -103,11 +140,13 @@ public class MyoActivity extends AppCompatActivity {
                 }
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
-
+                    if(player != null) {
+                        player.pause();
+                    }
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
-                    
+
                 }
 
                 //TODO: Do something awesome.
