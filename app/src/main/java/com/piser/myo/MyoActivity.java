@@ -1,18 +1,21 @@
 package com.piser.myo;
 
-import android.app.FragmentManager;
+/**
+ * Created by sergiopadilla on 11/10/16.
+ */
+
 import android.content.Intent;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.android.youtube.player.YouTubePlayer.Provider;
+import com.google.android.youtube.player.YouTubePlayerView;
 import com.piser.myo.Youtube.DeveloperKey;
 import com.thalmic.myo.AbstractDeviceListener;
 import com.thalmic.myo.Arm;
@@ -23,13 +26,22 @@ import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.XDirection;
 import com.thalmic.myo.scanner.ScanActivity;
 
-public class MyoActivity extends AppCompatActivity {
+public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener {
 
-    public final static String TAG = "Myo Activity";
+    /**
+     * Youtube
+     */
+    private static final int RECOVERY_REQUEST = 1;
+    private static final String VIDEOID = "RrGqlGxRIn0";
+    private YouTubePlayerView youTubeView;
+    private YouTubePlayer player;
 
+    /**
+     * Myo
+     */
     private Hub hub;
     private AbstractDeviceListener listener;
-
+    public final static String TAG = "Myo Activity";
     private TextView connected_label;
     private TextView arm_label;
     private TextView pose_label;
@@ -37,24 +49,20 @@ public class MyoActivity extends AppCompatActivity {
     private TextView y_orientation_label;
     private TextView z_orientation_label;
 
-    private YouTubePlayerFragment youTubePlayerFragment;
-    private YouTubePlayer player; // control video
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_myo);
+        setContentView(R.layout.activity_youtube);
 
+        youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
+        youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
         connected_label = (TextView) findViewById(R.id.connectedlabel);
         arm_label = (TextView) findViewById(R.id.arm_label);
         pose_label = (TextView) findViewById(R.id.pose_label);
         x_orientation_label = (TextView) findViewById(R.id.x_orientation_label);
         y_orientation_label = (TextView) findViewById(R.id.y_orientation_label);
         z_orientation_label = (TextView) findViewById(R.id.z_orientation_label);
-
-        youTubePlayerFragment = (YouTubePlayerFragment)getFragmentManager()
-                .findFragmentById(R.id.youtube_fragment);
 
         hub = Hub.getInstance();
 
@@ -71,32 +79,7 @@ public class MyoActivity extends AppCompatActivity {
             startConnectActivity();
             // Create listener for Myo
             listener = get_listener();
-
-            createYoutubeFragment();
         }
-    }
-
-    private void createYoutubeFragment() {
-        YouTubePlayerFragment youTubeFragment = YouTubePlayerFragment.newInstance();
-
-        youTubeFragment.initialize(DeveloperKey.DEVELOPER_KEY,
-                new YouTubePlayer.OnInitializedListener() {
-            @Override
-            public void onInitializationSuccess(YouTubePlayer.Provider provider,
-                                                YouTubePlayer youTubePlayer, boolean b) {
-                player = youTubePlayer;
-                player.cueVideo("RrGqlGxRIn0");
-                player.play();
-            }
-
-            @Override
-            public void onInitializationFailure(YouTubePlayer.Provider provider,
-                                                YouTubeInitializationResult
-                                                        youTubeInitializationResult) {
-                Toast.makeText(getApplicationContext(), "YouTubePlayer.onInitializationFailure(): "
-                        + youTubeInitializationResult.toString(), Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     private void startConnectActivity() {
@@ -107,7 +90,6 @@ public class MyoActivity extends AppCompatActivity {
     }
 
     private AbstractDeviceListener get_listener() {
-
         /**
          * Get the listener to myo device
          */
@@ -139,6 +121,9 @@ public class MyoActivity extends AppCompatActivity {
                 }
                 else if(pose == Pose.DOUBLE_TAP) {
                     // Movimiento pinza doble (dificil de reconocer)
+                    if(player!= null) {
+                        player.setFullscreen(true);
+                    }
 
                 }
                 else if(pose == Pose.WAVE_IN) {
@@ -157,6 +142,9 @@ public class MyoActivity extends AppCompatActivity {
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
+                    if(player != null) {
+                        player.play();
+                    }
                 }
 
 
@@ -192,6 +180,36 @@ public class MyoActivity extends AppCompatActivity {
                 z_orientation_label.setText("Zº: "+String.valueOf(yaw));
             }
         };
+    }
+
+    @Override
+    public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
+        if (!wasRestored) {
+            this.player = player;
+            player.loadVideo(VIDEOID);
+            player.play();
+        }
+    }
+
+    @Override
+    public void onInitializationFailure(Provider provider, YouTubeInitializationResult errorReason) {
+        if (errorReason.isUserRecoverableError()) {
+            errorReason.getErrorDialog(this, RECOVERY_REQUEST).show();
+        } else {
+            Toast.makeText(this, "ERROR", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RECOVERY_REQUEST) {
+            // Retry initialization if user performed a recovery action
+            getYouTubePlayerProvider().initialize(DeveloperKey.DEVELOPER_KEY, this);
+        }
+    }
+
+    protected Provider getYouTubePlayerProvider() {
+        return youTubeView;
     }
 
     @Override
