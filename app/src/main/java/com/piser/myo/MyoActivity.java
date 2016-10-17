@@ -114,6 +114,14 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
+                // Modifico los movimientos segun el brazo en el que se encuentre el dispositivo
+                if (myo.getArm() == Arm.LEFT) {
+                    if (pose == Pose.WAVE_IN) {
+                        pose = Pose.WAVE_OUT;
+                    } else if (pose == Pose.WAVE_OUT) {
+                        pose = Pose.WAVE_IN;
+                    }
+                }
                 pose_label.setText("Pose: " + pose.toString());
 
                 if(pose == Pose.REST) {
@@ -168,7 +176,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 float roll = (float) Math.toDegrees(Quaternion.roll(rotation));
                 float pitch = (float) Math.toDegrees(Quaternion.pitch(rotation));
                 float yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
-                // Adjust roll and pitch for the orientation of the Myo on the arm.
+                // Indica si el Myo apunta hacia el codo (si XDirection.TOWARD_WRIST hacia muñeca)
                 if (myo.getXDirection() == XDirection.TOWARD_ELBOW) {
                     roll *= -1;
                     pitch *= -1;
