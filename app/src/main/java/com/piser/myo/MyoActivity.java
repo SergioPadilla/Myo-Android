@@ -128,11 +128,14 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
                 }
                 else if(pose == Pose.WAVE_IN) {
-                    player.seekToMillis(player.getCurrentTimeMillis() - 5000);
-
+                    if(player != null) {
+                        player.seekToMillis(player.getCurrentTimeMillis() - 5000);
+                    }
                 }
                 else if(pose == Pose.WAVE_OUT) {
-                    player.seekToMillis(player.getCurrentTimeMillis() + 5000);
+                    if(player != null) {
+                        player.seekToMillis(player.getCurrentTimeMillis() + 5000);
+                    }
 
                 }
                 else if(pose == Pose.FIST) {
