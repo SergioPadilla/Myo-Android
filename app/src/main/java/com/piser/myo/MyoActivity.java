@@ -192,7 +192,10 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 fullscreen = b;
             }
         });
-asd
+        if (!wasRestored) {
+            player.loadVideo(VIDEOID);
+            player.play();
+        }
     }
 
     @Override
