@@ -35,7 +35,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private static final String VIDEOID = "RrGqlGxRIn0";
     private YouTubePlayerView youTubeView;
     private YouTubePlayer player;
-
+    private boolean fullscreen = false;
     /**
      * Myo
      */
@@ -123,6 +123,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                     // Movimiento pinza doble (dificil de reconocer)
                     if(player!= null) {
                         player.setFullscreen(true);
+                        fullscreen = true;
                     }
 
                 }
@@ -146,9 +147,6 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                         player.play();
                     }
                 }
-
-
-                //TODO: Do something awesome.
             }
 
             @Override
@@ -184,8 +182,14 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
     @Override
     public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
+        this.player = player;
+        this.player.setOnFullscreenListener(new YouTubePlayer.OnFullscreenListener() {
+            @Override
+            public void onFullscreen(boolean b) {
+                fullscreen = b;
+            }
+        });
         if (!wasRestored) {
-            this.player = player;
             player.loadVideo(VIDEOID);
             player.play();
         }
@@ -228,5 +232,13 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     protected void onPause() {
         super.onPause();
         hub.removeListener(listener);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(fullscreen)
+            player.setFullscreen(false);
+        else
+            super.onBackPressed();
     }
 }
