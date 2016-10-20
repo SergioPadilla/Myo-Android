@@ -48,6 +48,10 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private TextView x_orientation_label;
     private TextView y_orientation_label;
     private TextView z_orientation_label;
+    private float roll;
+    private float pitch;
+    private float yaw;
+
 
 
     @Override
@@ -121,9 +125,16 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 }
                 else if(pose == Pose.DOUBLE_TAP) {
                     // Movimiento pinza doble (dificil de reconocer)
+                    // añadido salir de pantalla completa
                     if(player!= null) {
-                        player.setFullscreen(true);
-                        fullscreen = true;
+                        if(fullscreen) {
+                            player.setFullscreen(true);
+                            fullscreen = true;
+                        }
+                        else
+                            player.setFullscreen(false);
+                            fullscreen = false;
+
                     }
 
                 }
@@ -138,16 +149,27 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                     }
 
                 }
+                //comprobando la diferencia de estilos
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
                     if(player != null) {
-                        player.pause();
+                        if (pitch>0) {
+                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS);
+                        }
+                        else {
+                            player.pause();
+                        }
                     }
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
                     if(player != null) {
-                        player.play();
+                        if (pitch>0) {
+                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.MINIMAL);
+                        }
+                        else {
+                            player.play();
+                        }
                     }
                 }
             }
@@ -166,9 +188,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
                 // Calcula los angulos de Euler
                 // (roll: eje morro cola (x)) (pitch: eje ala (y)) (yaw: eje perpenticular al objeto (z))
-                float roll = (float) Math.toDegrees(Quaternion.roll(rotation));
-                float pitch = (float) Math.toDegrees(Quaternion.pitch(rotation));
-                float yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
+                 roll = (float) Math.toDegrees(Quaternion.roll(rotation));
+                 pitch = (float) Math.toDegrees(Quaternion.pitch(rotation));
+                 yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
                 // Adjust roll and pitch for the orientation of the Myo on the arm.
                 if (myo.getXDirection() == XDirection.TOWARD_ELBOW) {
                     roll *= -1;
@@ -194,7 +216,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         });
         if (!wasRestored) {
             player.loadVideo(VIDEOID);
-            player.play();
+            //player.play();
         }
     }
 
