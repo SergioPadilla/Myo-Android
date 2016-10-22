@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.*;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -40,6 +41,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private YouTubePlayerView youTubeView;
     private YouTubePlayer player;
     private boolean fullscreen = false;
+    private MediaPlayer playerControl;
     /**
      * Myo
      */
@@ -90,6 +92,8 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         drawer_layout.openDrawer(left_layout);
         season.setAdapter(chapters);
 
+
+
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
             finish();
@@ -104,6 +108,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             // Create listener for Myo
             listener = get_listener();
         }
+
+        AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
     }
 
     private void startConnectActivity() {
@@ -138,6 +145,10 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
+
+                // nose si lo puedo declarar en el OnCreate , ya que si cambio de video quizas el volumen asociado sea otro
+                AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
                 pose_label.setText("Pose: " + pose.toString());
 
                 if(pose == Pose.REST) {
@@ -168,12 +179,16 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                     // Cerrar puño
                     if(player != null && !drawer_open) {
                         player.pause();
+                        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+1, AudioManager.FLAG_SHOW_UI);
+
                     }
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
                     if(player != null && !drawer_open) {
                         player.play();
+                        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)-1, AudioManager.FLAG_SHOW_UI);
+
                     }
                 }
             }
