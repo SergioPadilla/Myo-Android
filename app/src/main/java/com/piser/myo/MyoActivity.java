@@ -21,6 +21,7 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerView;
+import com.piser.myo.Utils.Chapters.Chapter;
 import com.piser.myo.Utils.Chapters.ChaptersAdapterList;
 import com.piser.myo.Utils.Youtube.DeveloperKey;
 import com.thalmic.myo.AbstractDeviceListener;
@@ -66,8 +67,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private DrawerLayout drawer_layout;
     private LinearLayout left_layout;
     private ListView season;
-    ChaptersAdapterList chapters;
-    private int iterator = 0; //TODO: remove
+    private ChaptersAdapterList chapters;
+    private int position_selected;
+    private boolean block_selector;
 
 
     @Override
@@ -89,9 +91,10 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         z_orientation_label = (TextView) findViewById(R.id.z_orientation_label);
 
         hub = Hub.getInstance();
-        drawer_open = true;
-        drawer_layout.openDrawer(left_layout);
+        drawer_open = false;
         season.setAdapter(chapters);
+        position_selected = 0;
+        block_selector = false;
 
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
@@ -103,37 +106,20 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             // Capture the Myo nearest automatically
             //Hub.getInstance().attachToAdjacentMyo();
             // scan Myo by activity
-            //startConnectActivity();
+            startConnectActivity();
             // Create listener for Myo
             listener = get_listener();
         }
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int pos = getNextIterator()%chapters.getCount();
-                        View focused = chapters.getView(pos, null, season);
-                        season.smoothScrollToPosition(pos);
-                        for(int j = 0; j < season.getChildCount(); j++) {
-                            View view = season.getChildAt(j);
-                            if(focused.getId() == view.getId()) {
-                                view.setBackgroundColor(Color.parseColor("#FF2A53D7"));
-                            }
-                            else {
-                                view.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                            }
-                        }
-                    }
-                });
-            }
-        }, 3000, 3000);
     }
 
-    private int getNextIterator() {
-        return iterator++;
+    private void closeSelector() {
+        drawer_layout.closeDrawer(left_layout);
+        drawer_open = false;
+    }
+
+    private void openSelector() {
+        drawer_layout.openDrawer(left_layout);
+        drawer_open = true;
     }
 
     private void startConnectActivity() {
@@ -182,20 +168,29 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 }
                 else if(pose == Pose.WAVE_IN) {
                     if(drawer_open) {
-                        drawer_layout.closeDrawer(left_layout);
-                        drawer_open = false;
+                        closeSelector();
                     }
                 }
                 else if(pose == Pose.WAVE_OUT) {
                     if(!drawer_open) {
-                        drawer_layout.openDrawer(left_layout);
-                        drawer_open = true;
+                        openSelector();
                     }
                 }
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
-                    if(player != null && !drawer_open) {
-                        player.pause();
+                    if(!drawer_open) {
+                        if (player != null) {
+                            player.pause();
+                        }
+                    } else {
+                        block_selector = true; // block the selection of video for security
+                        Chapter chapter = (Chapter) season.getItemAtPosition(position_selected);
+                        String video_id = chapter.getId();
+                        if(player != null) {
+                            player.loadVideo(video_id);
+                            closeSelector();
+                        }
+                        block_selector = false;
                     }
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
@@ -221,18 +216,33 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 // Calcula los angulos de Euler
                 // (roll: eje morro cola (x)) (pitch: eje ala (y)) (yaw: eje perpenticular al objeto (z))
                 float roll = (float) Math.toDegrees(Quaternion.roll(rotation));
-                float pitch = (float) Math.toDegrees(Quaternion.pitch(rotation));
+                float pitch = ((-1)*((float) Math.toDegrees(Quaternion.pitch(rotation)))) + 60;
                 float yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
-                // Adjust roll and pitch for the orientation of the Myo on the arm.
-                if (myo.getXDirection() == XDirection.TOWARD_ELBOW) {
-                    roll *= -1;
-                    pitch *= -1;
-                }
-                // Next, we apply a rotation to the text view using the roll, pitch, and yaw.
 
+                // Next, we apply a rotation to the text view using the roll, pitch, and yaw.
                 x_orientation_label.setText("Xº: "+String.valueOf(roll));
                 y_orientation_label.setText("Yº: "+String.valueOf(pitch));
                 z_orientation_label.setText("Zº: "+String.valueOf(yaw));
+
+                if(drawer_open && !block_selector) { //block selector for security
+                    int dif = 120 / chapters.getCount();
+                    int pos = (int) pitch / dif;
+                    if(pos >= 0 && pos < chapters.getCount()) {
+                        View focused = chapters.getView(pos, null, season);
+                        season.setSelection(pos);
+                        for (int j = 0; j < season.getChildCount(); j++) {
+                            View view = season.getChildAt(j);
+                            if (focused.getId() == view.getId()) {
+                                view.setFocusable(true);
+                                view.setBackgroundColor(Color.parseColor("#3b60d7"));
+                                position_selected = pos;
+                            } else {
+                                view.setFocusable(false);
+                                view.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            }
+                        }
+                    }
+                }
             }
         };
     }

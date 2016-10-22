@@ -116,7 +116,7 @@
         android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#d5ffffff"
+        android:background="#deffffff"
         android:id="@+id/left_drawer"
         android:orientation="vertical">
 
