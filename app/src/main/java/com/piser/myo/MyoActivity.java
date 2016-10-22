@@ -5,10 +5,12 @@ package com.piser.myo;
  */
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,13 +33,16 @@ import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.XDirection;
 import com.thalmic.myo.scanner.ScanActivity;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener {
 
     /**
      * Youtube
      */
     private static final int RECOVERY_REQUEST = 1;
-    private static final String VIDEOID = "RrGqlGxRIn0";
+    private static final String VIDEOID = "kWzgRHC5apY";
     private YouTubePlayerView youTubeView;
     private YouTubePlayer player;
     private boolean fullscreen = false;
@@ -67,6 +72,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private LinearLayout left_layout;
     private ListView season;
     ChaptersAdapterList chapters;
+    private int iterator = 0; //TODO: remove
 
 
     @Override
@@ -92,7 +98,8 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         drawer_layout.openDrawer(left_layout);
         season.setAdapter(chapters);
 
-
+        AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
 
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
@@ -109,8 +116,32 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             listener = get_listener();
         }
 
-        AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int pos = getNextIterator()%chapters.getCount();
+                        View focused = chapters.getView(pos, null, season);
+                        season.smoothScrollToPosition(pos);
+                        for(int j = 0; j < season.getChildCount(); j++) {
+                            View view = season.getChildAt(j);
+                            if(focused.getId() == view.getId()) {
+                                view.setBackgroundColor(Color.parseColor("#FF2A53D7"));
+                            }
+                            else {
+                                view.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            }
+                        }
+                    }
+                });
+            }
+        }, 3000, 3000);
+    }
+
+    private int getNextIterator() {
+        return iterator++;
     }
 
     private void startConnectActivity() {
@@ -160,7 +191,6 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                         player.setFullscreen(true);
                         fullscreen = true;
                     }
-
                 }
                 else if(pose == Pose.WAVE_IN) {
                     if(drawer_open) {
@@ -173,7 +203,6 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                         drawer_layout.openDrawer(left_layout);
                         drawer_open = true;
                     }
-
                 }
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
