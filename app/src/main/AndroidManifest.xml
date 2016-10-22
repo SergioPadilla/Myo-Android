@@ -15,7 +15,8 @@
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait">
 
-        <activity android:name=".MyoActivity">
+        <activity android:name=".MyoActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

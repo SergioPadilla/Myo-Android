@@ -5,6 +5,7 @@ package com.piser.myo;
  */
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -47,7 +48,6 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private YouTubePlayerView youTubeView;
     private YouTubePlayer player;
     private boolean fullscreen = false;
-    private MediaPlayer playerControl;
     private AudioManager audioManager;
 
     /**
@@ -67,7 +67,6 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private float yaw;
     boolean oneTime;
 
-
     /**
      * Drawer layout controllers
      */
@@ -85,6 +84,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youtube);
 
+        /**
+         * Init view component
+         */
         drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
         left_layout = (LinearLayout) findViewById(R.id.left_drawer);
         season = (ListView) findViewById(R.id.season_list);
@@ -98,15 +100,24 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         y_orientation_label = (TextView) findViewById(R.id.y_orientation_label);
         z_orientation_label = (TextView) findViewById(R.id.z_orientation_label);
 
-        hub = Hub.getInstance();
+        /**
+         * Init drawer layout controllers
+         */
         drawer_open = false;
         season.setAdapter(chapters);
         position_selected = 0;
         block_selector = false;
 
+        /**
+         * Init audio controler
+         */
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         oneTime=true;
 
+        /**
+         * Init MYO controllers
+         */
+        hub = Hub.getInstance();
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
             finish();
@@ -331,5 +342,10 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             player.setFullscreen(false);
         else
             super.onBackPressed();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 }
