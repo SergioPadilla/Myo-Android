@@ -227,7 +227,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
                 // Calcula los angulos de Euler
                 // (roll: eje morro cola (x)) (pitch: eje ala (y)) (yaw: eje perpenticular al objeto (z))
-                float roll = (float) Math.toDegrees(Quaternion.roll(rotation));
+                float roll = ((-1)*(float) Math.toDegrees(Quaternion.roll(rotation)));
                 float pitch = ((-1)*((float) Math.toDegrees(Quaternion.pitch(rotation)))) + 60;
                 float yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
 
@@ -255,19 +255,18 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                         }
                     }
                 }
-                if (roll>80 && oneTime){
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+1, AudioManager.FLAG_SHOW_UI);
-                    oneTime=false;
+                else if(!drawer_open) {
+                    if (roll > 80 && oneTime) {
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) + 1, AudioManager.FLAG_SHOW_UI);
+                        oneTime = false;
 
+                    } else if (roll < -10 && oneTime) {
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) - 1, AudioManager.FLAG_SHOW_UI);
+                        oneTime = false;
+                    } else if (roll > 0 && roll < 40) {
+                        oneTime = true;
+                    }
                 }
-                else if (roll<-10 && oneTime){
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)-1, AudioManager.FLAG_SHOW_UI);
-                    oneTime=false;
-                }
-                else if (roll==0){
-                    oneTime=true;
-                }
-
             }
         };
     }
