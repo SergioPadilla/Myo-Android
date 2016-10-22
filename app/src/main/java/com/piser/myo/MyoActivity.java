@@ -153,8 +153,8 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
                     if(player != null) {
-                        if (pitch>0) {
-                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS);
+                        if (pitch<50) {  //altura Y
+                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
                         }
                         else {
                             player.pause();
@@ -164,8 +164,8 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
                     if(player != null) {
-                        if (pitch>0) {
-                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.MINIMAL);
+                        if (pitch<-50) {
+                            player.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS);
                         }
                         else {
                             player.play();
