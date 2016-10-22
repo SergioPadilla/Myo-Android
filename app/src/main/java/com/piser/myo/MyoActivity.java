@@ -47,6 +47,8 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private YouTubePlayer player;
     private boolean fullscreen = false;
     private MediaPlayer playerControl;
+    private AudioManager audioManager;
+
     /**
      * Myo
      */
@@ -62,6 +64,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private float roll;
     private float pitch;
     private float yaw;
+    boolean oneTime;
 
 
     /**
@@ -98,8 +101,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         drawer_layout.openDrawer(left_layout);
         season.setAdapter(chapters);
 
-        AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        oneTime=true;
+
 
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
@@ -177,9 +181,6 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
 
-                // nose si lo puedo declarar en el OnCreate , ya que si cambio de video quizas el volumen asociado sea otro
-                AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-
                 pose_label.setText("Pose: " + pose.toString());
 
                 if(pose == Pose.REST) {
@@ -208,16 +209,12 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                     // Cerrar puño
                     if(player != null && !drawer_open) {
                         player.pause();
-                        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+1, AudioManager.FLAG_SHOW_UI);
-
                     }
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
                     if(player != null && !drawer_open) {
                         player.play();
-                        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)-1, AudioManager.FLAG_SHOW_UI);
-
                     }
                 }
             }
@@ -249,6 +246,19 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 x_orientation_label.setText("Xº: "+String.valueOf(roll));
                 y_orientation_label.setText("Yº: "+String.valueOf(pitch));
                 z_orientation_label.setText("Zº: "+String.valueOf(yaw));
+                if (roll>80 && oneTime){
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+1, AudioManager.FLAG_SHOW_UI);
+                    oneTime=false;
+
+                }
+                else if (roll<-10 && oneTime){
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)-1, AudioManager.FLAG_SHOW_UI);
+                    oneTime=false;
+                }
+                else if (roll==0){
+                    oneTime=true;
+                }
+
             }
         };
     }
