@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.*;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -46,6 +47,8 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private YouTubePlayerView youTubeView;
     private YouTubePlayer player;
     private boolean fullscreen = false;
+    private MediaPlayer playerControl;
+    private AudioManager audioManager;
 
     /**
      * Myo
@@ -59,6 +62,11 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private TextView x_orientation_label;
     private TextView y_orientation_label;
     private TextView z_orientation_label;
+    private float roll;
+    private float pitch;
+    private float yaw;
+    boolean oneTime;
+
 
     /**
      * Drawer layout controllers
@@ -95,6 +103,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         season.setAdapter(chapters);
         position_selected = 0;
         block_selector = false;
+
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        oneTime=true;
 
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
@@ -154,6 +165,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
+
                 pose_label.setText("Pose: " + pose.toString());
 
                 if(pose == Pose.REST) {
@@ -243,6 +255,19 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                         }
                     }
                 }
+                if (roll>80 && oneTime){
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+1, AudioManager.FLAG_SHOW_UI);
+                    oneTime=false;
+
+                }
+                else if (roll<-10 && oneTime){
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)-1, AudioManager.FLAG_SHOW_UI);
+                    oneTime=false;
+                }
+                else if (roll==0){
+                    oneTime=true;
+                }
+
             }
         };
     }
@@ -258,7 +283,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         });
         if (!wasRestored) {
             player.loadVideo(VIDEOID);
-//            player.play();
+            //player.play();
         }
     }
 
