@@ -5,10 +5,12 @@ package com.piser.myo;
  */
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -29,6 +31,9 @@ import com.thalmic.myo.Pose;
 import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.XDirection;
 import com.thalmic.myo.scanner.ScanActivity;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener {
 
@@ -62,6 +67,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private LinearLayout left_layout;
     private ListView season;
     ChaptersAdapterList chapters;
+    private int iterator = 0; //TODO: remove
 
 
     @Override
@@ -97,10 +103,37 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
             // Capture the Myo nearest automatically
             //Hub.getInstance().attachToAdjacentMyo();
             // scan Myo by activity
-            startConnectActivity();
+            //startConnectActivity();
             // Create listener for Myo
             listener = get_listener();
         }
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int pos = getNextIterator()%chapters.getCount();
+                        View focused = chapters.getView(pos, null, season);
+                        season.smoothScrollToPosition(pos);
+                        for(int j = 0; j < season.getChildCount(); j++) {
+                            View view = season.getChildAt(j);
+                            if(focused.getId() == view.getId()) {
+                                view.setBackgroundColor(Color.parseColor("#FF2A53D7"));
+                            }
+                            else {
+                                view.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                            }
+                        }
+                    }
+                });
+            }
+        }, 3000, 3000);
+    }
+
+    private int getNextIterator() {
+        return iterator++;
     }
 
     private void startConnectActivity() {
