@@ -7,7 +7,10 @@ package com.piser.myo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,7 +19,8 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerView;
-import com.piser.myo.Youtube.DeveloperKey;
+import com.piser.myo.Utils.Chapters.ChaptersAdapterList;
+import com.piser.myo.Utils.Youtube.DeveloperKey;
 import com.thalmic.myo.AbstractDeviceListener;
 import com.thalmic.myo.Arm;
 import com.thalmic.myo.Hub;
@@ -32,10 +36,11 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
      * Youtube
      */
     private static final int RECOVERY_REQUEST = 1;
-    private static final String VIDEOID = "RrGqlGxRIn0";
+    private static final String VIDEOID = "kWzgRHC5apY";
     private YouTubePlayerView youTubeView;
     private YouTubePlayer player;
     private boolean fullscreen = false;
+
     /**
      * Myo
      */
@@ -49,12 +54,25 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     private TextView y_orientation_label;
     private TextView z_orientation_label;
 
+    /**
+     * Drawer layout controllers
+     */
+    private boolean drawer_open;
+    private DrawerLayout drawer_layout;
+    private LinearLayout left_layout;
+    private ListView season;
+    ChaptersAdapterList chapters;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youtube);
 
+        drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        left_layout = (LinearLayout) findViewById(R.id.left_drawer);
+        season = (ListView) findViewById(R.id.season_list);
+        chapters = new ChaptersAdapterList(this);
         youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
         youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
         connected_label = (TextView) findViewById(R.id.connectedlabel);
@@ -65,6 +83,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         z_orientation_label = (TextView) findViewById(R.id.z_orientation_label);
 
         hub = Hub.getInstance();
+        drawer_open = true;
+        drawer_layout.openDrawer(left_layout);
+        season.setAdapter(chapters);
 
         if (!hub.init(this)) {
             Log.e(TAG, "Could not initialize the Hub.");
@@ -121,32 +142,32 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 }
                 else if(pose == Pose.DOUBLE_TAP) {
                     // Movimiento pinza doble (dificil de reconocer)
-                    if(player!= null) {
+                    if(player!= null && !drawer_open) {
                         player.setFullscreen(true);
                         fullscreen = true;
                     }
-
                 }
                 else if(pose == Pose.WAVE_IN) {
-                    if(player != null) {
-                        player.seekToMillis(player.getCurrentTimeMillis() - 5000);
+                    if(drawer_open) {
+                        drawer_layout.closeDrawer(left_layout);
+                        drawer_open = false;
                     }
                 }
                 else if(pose == Pose.WAVE_OUT) {
-                    if(player != null) {
-                        player.seekToMillis(player.getCurrentTimeMillis() + 5000);
+                    if(!drawer_open) {
+                        drawer_layout.openDrawer(left_layout);
+                        drawer_open = true;
                     }
-
                 }
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
-                    if(player != null) {
+                    if(player != null && !drawer_open) {
                         player.pause();
                     }
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
-                    if(player != null) {
+                    if(player != null && !drawer_open) {
                         player.play();
                     }
                 }
@@ -194,7 +215,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         });
         if (!wasRestored) {
             player.loadVideo(VIDEOID);
-            player.play();
+//            player.play();
         }
     }
 
