@@ -71,11 +71,11 @@ public class ChaptersAdapterList extends ArrayAdapter<Chapter> {
         chapters.add(new Chapter("1x03", "El próximo antes de ayer", "fD6rngYE12M"));
         chapters.add(new Chapter("1x04", "Chair Driver", "RbJFJEfviY8"));
         chapters.add(new Chapter("1x05", "Callejosos", "kWzgRHC5apY"));
-        chapters.add(new Chapter("1x01", "Me dicen negro", "ztL8KMLJ9Is"));
-        chapters.add(new Chapter("1x02", "La cosecha", "FxO1poo8f2I"));
-        chapters.add(new Chapter("1x03", "El próximo antes de ayer", "fD6rngYE12M"));
-        chapters.add(new Chapter("1x04", "Chair Driver", "RbJFJEfviY8"));
-        chapters.add(new Chapter("1x05", "Callejosos", "kWzgRHC5apY"));
+        chapters.add(new Chapter("1x06", "Cuentos y leyendas", "HAwBh4747kE"));
+        chapters.add(new Chapter("1x07", "Módulo tres", "uZKl4jY1Jjg"));
+        chapters.add(new Chapter("1x08", "No girls", "i--XduiLsI0"));
+        chapters.add(new Chapter("1x09", "Cicatrices", "qUGd7sEcK8s"));
+        chapters.add(new Chapter("1x10", "Se vende", "aYsjewZQ5Ig"));
     }
 
     private static class ViewHolder {
