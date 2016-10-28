@@ -8,7 +8,6 @@ public class Chapter {
     /**
      * Contain the information of a chapter
      */
-
     private String title;
     private String code;
     private String id;
@@ -17,14 +16,6 @@ public class Chapter {
         this.code = code;
         this.id = id;
         this.title = title;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getCode() {
-        return code;
     }
 
     public String getId() {

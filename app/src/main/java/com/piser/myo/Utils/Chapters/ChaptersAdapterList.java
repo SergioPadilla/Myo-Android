@@ -21,7 +21,6 @@ public class ChaptersAdapterList extends ArrayAdapter<Chapter> {
     /**
      * Adapter contain the chapters of the list (usually, the chapters of a season)
      */
-
     private Activity activity;
     private List<Chapter> chapters;
 
@@ -34,6 +33,9 @@ public class ChaptersAdapterList extends ArrayAdapter<Chapter> {
     }
 
     public void setSeason(List<Chapter> season) {
+        /**
+         * Set the list data and notify the adapter for the changes
+         */
         chapters = season;
         clear();
         addAll(chapters);
@@ -43,6 +45,9 @@ public class ChaptersAdapterList extends ArrayAdapter<Chapter> {
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        /**
+         * We use viewholder pattern to optimize the calls to this method
+         */
         View item = convertView;
         ViewHolder holder;
 
@@ -66,6 +71,9 @@ public class ChaptersAdapterList extends ArrayAdapter<Chapter> {
     }
 
     private void loadChapters() {
+        /**
+         * Load mock data
+         */
         chapters.add(new Chapter("1x01", "Me dicen negro", "ztL8KMLJ9Is"));
         chapters.add(new Chapter("1x02", "La cosecha", "FxO1poo8f2I"));
         chapters.add(new Chapter("1x03", "El próximo antes de ayer", "fD6rngYE12M"));

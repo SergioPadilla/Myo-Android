@@ -35,9 +35,6 @@ import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.XDirection;
 import com.thalmic.myo.scanner.ScanActivity;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener {
 
     /**
@@ -70,7 +67,7 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     /**
      * Drawer layout controllers
      */
-    private boolean drawer_open;
+    private boolean drawer_open; // Control if the layout is open or close
     private DrawerLayout drawer_layout;
     private LinearLayout left_layout;
     private ListView season;
@@ -135,11 +132,17 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     }
 
     private void closeSelector() {
+        /**
+         * Close the left drawer (selector of chapters)
+         */
         drawer_layout.closeDrawer(left_layout);
         drawer_open = false;
     }
 
     private void openSelector() {
+        /**
+         * Open the left drawer (selector of chapters)
+         */
         drawer_layout.openDrawer(left_layout);
         drawer_open = true;
     }
@@ -158,8 +161,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
         return new AbstractDeviceListener() {
             @Override
             public void onConnect(Myo myo, long timestamp) {
-                Toast.makeText(getApplicationContext(), "Myo Connected!",
-                        Toast.LENGTH_SHORT).show();
+                /**
+                 * When myo is connected, show it in a label
+                 */
                 connected_label.setText("Myo Connected!");
                 connected_label.setTextColor(ContextCompat.getColor(MyoActivity.this,
                         android.R.color.holo_blue_dark));
@@ -167,8 +171,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
             @Override
             public void onDisconnect(Myo myo, long timestamp) {
-                Toast.makeText(getApplicationContext(), "Myo Disconnected!",
-                        Toast.LENGTH_SHORT).show();
+                /**
+                 * When myo is disconnected, show it in a label
+                 */
                 connected_label.setText("Myo Disconnected!");
                 connected_label.setTextColor(ContextCompat.getColor(MyoActivity.this,
                         android.R.color.holo_red_dark));
@@ -176,13 +181,18 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
             @Override
             public void onPose(Myo myo, long timestamp, Pose pose) {
-
+                /**
+                 * This interface in called when Myo detect some pose
+                 */
                 pose_label.setText("Pose: " + pose.toString());
 
                 if(pose == Pose.REST) {
                     // Mano normal
                 }
                 else if(pose == Pose.DOUBLE_TAP) {
+                    /**
+                     * Double tap put the video in full screen
+                     */
                     // Movimiento pinza doble (dificil de reconocer)
                     if(player!= null && !drawer_open) {
                         player.setFullscreen(true);
@@ -190,23 +200,34 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                     }
                 }
                 else if(pose == Pose.WAVE_IN) {
-                    if(drawer_open) {
+                    /**
+                     * This gesture close the selector only if it's open
+                     */
+                    if(drawer_open) { // the if structure, give user more security gestures
                         closeSelector();
                     }
                 }
                 else if(pose == Pose.WAVE_OUT) {
-                    if(!drawer_open) {
+                    /**
+                     * This gesture close the selector only if it's close
+                     */
+                    if(!drawer_open) { // the if structure, give user more security gestures
                         openSelector();
                     }
                 }
                 else if(pose == Pose.FIST) {
                     // Cerrar puño
+                    /**
+                     * This gesture have two functionalities depend on the left drawer
+                     *    1. If drawer is open, select the chapter and play it
+                     *    2. If drawer is close, pause the video that is playing
+                     */
                     if(!drawer_open) {
                         if (player != null) {
                             player.pause();
                         }
                     } else {
-                        block_selector = true; // block the selection of video for security
+                        block_selector = true; // block the chapter's seleection for security
                         Chapter chapter = (Chapter) season.getItemAtPosition(position_selected);
                         String video_id = chapter.getId();
                         if(player != null) {
@@ -218,6 +239,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 }
                 else if(pose == Pose.FINGERS_SPREAD) {
                     // Abrir mano y dedos
+                    /**
+                     * Play video only if the left drawer is close
+                     */
                     if(player != null && !drawer_open) {
                         player.play();
                     }
@@ -226,19 +250,29 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
             @Override
             public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection) {
+                /**
+                 * Show in the label, the arm where myo is wearing
+                 */
                 arm_label.setText(myo.getArm() == Arm.LEFT ? "Arm left" : "Arm right");
             }
 
             @Override
             public void onArmUnsync(Myo myo, long timestamp) {
+                /**
+                 * Util to detect if myo is disconnected
+                 */
                 arm_label.setText("Arm not Detected");
             }
 
             @Override
             public void onOrientationData(Myo myo, long timestamp, Quaternion rotation){
+                /**
+                 * This interface is called to give us the orientation of Myo
+                 */
                 // Calcula los angulos de Euler
                 // (roll: eje morro cola (x)) (pitch: eje ala (y)) (yaw: eje perpenticular al objeto (z))
                 float roll = ((-1)*(float) Math.toDegrees(Quaternion.roll(rotation)));
+                // pitch plus 60 allow us to set 0 when the arm is in the top
                 float pitch = ((-1)*((float) Math.toDegrees(Quaternion.pitch(rotation)))) + 60;
                 float yaw = (float) Math.toDegrees(Quaternion.yaw(rotation));
 
@@ -248,6 +282,15 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                 z_orientation_label.setText("Zº: "+String.valueOf(yaw));
 
                 if(drawer_open && !block_selector) { //block selector for security
+                    /**
+                     * We select a range between 0º and 120º in the y-axis
+                     * Then, we set a range for each chapter in the list (dif)
+                     * In this way, we select the chapter changing its background, focusing it and
+                     * save its position.
+                     *
+                     * Important: each time, we have to put the rest child background in the
+                     * original color
+                     */
                     int dif = 120 / chapters.getCount();
                     int pos = (int) pitch / dif;
                     if(pos >= 0 && pos < chapters.getCount()) {
@@ -267,14 +310,29 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                     }
                 }
                 else if(!drawer_open) {
+                    /**
+                     * Only when the selector is closed, we can to set Volumen to the video
+                     * That is contolled by the X-axis
+                     * We set a range between -10º and 80º
+                     *
+                     * Important: oneTime allow us control the volume, in this way, we
+                     * increase/reduce the volumen only 1 when the gesture is captured, and
+                     * init again when capture the rest position (beetwen 0º and 40º)
+                     */
                     if (roll > 80 && oneTime) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) + 1, AudioManager.FLAG_SHOW_UI);
+                        // arm spin more than 80º so increase the volumen in 1
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) + 1,
+                                AudioManager.FLAG_SHOW_UI);
                         oneTime = false;
-
                     } else if (roll < -10 && oneTime) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) - 1, AudioManager.FLAG_SHOW_UI);
+                        // arm spin less than -10º so reduce the volumen in 1
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) - 1,
+                                AudioManager.FLAG_SHOW_UI);
                         oneTime = false;
                     } else if (roll > 0 && roll < 40) {
+                        // arm in rest, allow you to change the volumen again
                         oneTime = true;
                     }
                 }
@@ -284,6 +342,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
     @Override
     public void onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
+        /**
+         * This interface is called by youtube api when it's initialized correctly
+         */
         this.player = player;
         this.player.setOnFullscreenListener(new YouTubePlayer.OnFullscreenListener() {
             @Override
@@ -299,6 +360,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
     @Override
     public void onInitializationFailure(Provider provider, YouTubeInitializationResult errorReason) {
+        /**
+         * This interface is called by youtube api when it's initialized incorrectly
+         */
         if (errorReason.isUserRecoverableError()) {
             errorReason.getErrorDialog(this, RECOVERY_REQUEST).show();
         } else {
@@ -308,6 +372,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        /**
+         * Get the activity result of youtube api
+         */
         if (requestCode == RECOVERY_REQUEST) {
             // Retry initialization if user performed a recovery action
             getYouTubePlayerProvider().initialize(DeveloperKey.DEVELOPER_KEY, this);
@@ -315,9 +382,13 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
     }
 
     protected Provider getYouTubePlayerProvider() {
+        // Neccesary for yotube api
         return youTubeView;
     }
 
+    /***********************************************************************************************
+     * Activity's Methods
+     ***********************************************************************************************/
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -346,6 +417,9 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        /**
+         * We need it to control the fullscreen of video
+         */
         super.onConfigurationChanged(newConfig);
     }
 }
