@@ -17,6 +17,10 @@
 
         <activity android:name=".MyoActivity"
             android:configChanges="orientation|screenSize|keyboardHidden">
+
+        </activity>
+
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
