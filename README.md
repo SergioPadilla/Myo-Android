@@ -18,4 +18,4 @@ Finally, spinning your arm, you can change the volume of the video and with the 
 
 ## Developers
 If you want to use this app, you need a developer key to use Youtube API.
-Please, [folow this steps](https://developers.google.com/youtube/android/player/register) to obtain your DeveloperKey and copy it in the file "DeveloperKey.java".
+Please, [follow this steps](https://developers.google.com/youtube/android/player/register) to obtain your DeveloperKey and copy it in the file "DeveloperKey.java".
