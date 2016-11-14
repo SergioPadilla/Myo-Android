@@ -194,10 +194,10 @@ public class MyoActivity extends YouTubeBaseActivity implements YouTubePlayer.On
                      * Double tap put the video in full screen
                      */
                     // Movimiento pinza doble (dificil de reconocer)
-                    if(player!= null && !drawer_open) {
-                        player.setFullscreen(true);
-                        fullscreen = true;
-                    }
+//                    if(player!= null && !drawer_open) {
+//                        player.setFullscreen(true);
+//                        fullscreen = true;
+//                    }
                 }
                 else if(pose == Pose.WAVE_IN) {
                     /**
